@@ -3,7 +3,10 @@ const fromPairs = require('lodash.frompairs');
 const emoji = require('emoji-datasource-apple/emoji');
 
 function defineEmoji(data, callback) {
-  const pairs = emoji.filter(e => e.has_img_apple).map((e) => {
+    const pairs = emoji
+      .filter(e => e.has_img_apple && e.category === 'Smileys & Emotion')
+      .map((e) => {
+      
     const name = e.short_name;
     const aliases = e.short_names.slice(1);
     const ascii = (e.texts || []).map(x => x.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
