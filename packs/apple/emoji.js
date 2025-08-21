@@ -2,30 +2,45 @@ const path = require('path');
 const fromPairs = require('lodash.frompairs');
 const emoji = require('emoji-datasource-apple/emoji');
 
-function defineEmoji(data, callback) {
-    const pairs = emoji
-      .filter(e => e.has_img_apple && e.category === 'Smileys & Emotion')
-      .map((e) => {
-      
-    const name = e.short_name;
-    const aliases = e.short_names.slice(1);
-    const ascii = (e.texts || []).map(x => x.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
-    const character = e.unified
-      .split('-')
-      .map(code => String.fromCodePoint(parseInt(code, 16)))
-      .join('');
-    let category = e.category.toLowerCase();
-    if (category === 'skin tones') { category = 'modifier'; } else if (category === 'foods') { category = 'food'; } else if (category === 'places') { category = 'travel'; }
+// רשימת האימוג'ים המותרים בלבד
+const allowed = new Set([
+  'stuck_out_tongue_winking_eye',
+  '+1',
+  '-1',
+  'astonished',
+  'anguished',
+  'angry',
+  'cry',
+  'rolling_eyes',
+  'hugging_face',
+  'joy',
+  'rofl',
+  'wave',
+]);
 
-    return [name, {
-      aliases,
-      ascii,
-      character,
-      categories: [category],
-      keywords: e.keywords,
-      image: e.image,
-    }];
-  });
+function defineEmoji(data, callback) {
+  const pairs = emoji
+    .filter(e => e.has_img_apple && allowed.has(e.short_name))
+    .map((e) => {
+      const name = e.short_name;
+      const aliases = e.short_names.slice(1);
+      const ascii = (e.texts || []).map(x => x.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+      const character = e.unified
+        .split('-')
+        .map(code => String.fromCodePoint(parseInt(code, 16)))
+        .join('');
+      let category = e.category.toLowerCase();
+      if (category === 'skin tones') { category = 'modifier'; } else if (category === 'foods') { category = 'food'; } else if (category === 'places') { category = 'travel'; }
+
+      return [name, {
+        aliases,
+        ascii,
+        character,
+        categories: [category],
+        keywords: e.keywords,
+        image: e.image,
+      }];
+    });
 
   const dictionary = fromPairs(pairs);
 
